@@ -17,9 +17,13 @@ public class CustomPageAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         switch (position) {
-
+            case 0:
+                return new MapsFragment();
+            case 1:
+                return new ListFragment();
+            default:
+                return new ListFragment();
         }
-        return null;
     }
 
     @Override
