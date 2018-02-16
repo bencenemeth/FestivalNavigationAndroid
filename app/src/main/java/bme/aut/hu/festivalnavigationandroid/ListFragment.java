@@ -7,15 +7,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+
 /**
  * Created by ben23 on 2018-02-14.
  */
 
 public class ListFragment extends Fragment {
 
+    ArrayList<InterestPoint> pois;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // TODO: ERROR HANDLING
+        if(getArguments() != null)
+            pois = getArguments().getParcelableArrayList("poi");
     }
 
     @Override
@@ -24,6 +31,14 @@ public class ListFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_list, container, false);
         return view;
+    }
+
+    public static ListFragment newInstance(ArrayList<InterestPoint> poi) {
+        ListFragment fragment = new ListFragment();
+        Bundle args = new Bundle();
+        args.putParcelableArrayList("poi", poi);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     /**
