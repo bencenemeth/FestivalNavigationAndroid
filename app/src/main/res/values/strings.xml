@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FestivalNavigationAndroid</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCcUmYt9JbJfuz7rQoqmwH3J8xXna4ia4s</string>
 </resources>
