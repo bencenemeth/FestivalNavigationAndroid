@@ -1,4 +1,4 @@
-package bme.aut.hu.festivalnavigationandroid;
+package bme.aut.hu.festivalnavigationandroid.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

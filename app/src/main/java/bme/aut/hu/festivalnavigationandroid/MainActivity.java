@@ -13,6 +13,9 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
+import bme.aut.hu.festivalnavigationandroid.model.InterestPoint;
+import bme.aut.hu.festivalnavigationandroid.model.MyTime;
+
 public class MainActivity extends AppCompatActivity implements ListFragment.OnFragmentInteractionListener {
 
     private CustomPageAdapter adapter;
@@ -41,13 +44,13 @@ public class MainActivity extends AppCompatActivity implements ListFragment.OnFr
         // Test data
         pois.add(new InterestPoint(new LatLng(47.552595, 19.055235), "Nagyszínpad",
                 new MyTime(23, 0), new MyTime(12, 0),
-                InterestPoint.Category.STAGE, "asd"));
+                InterestPoint.Category.Stage, "asd"));
         pois.add(new InterestPoint(new LatLng(47.550664, 19.054935), "A38",
                 new MyTime(20, 0), new MyTime(21, 0),
-                InterestPoint.Category.STAGE, "asd"));
+                InterestPoint.Category.Stage, "asd"));
         pois.add(new InterestPoint(new LatLng(47.551551, 19.051904), "City Centre",
                 new MyTime(0, 0), new MyTime(23, 59),
-                InterestPoint.Category.INFOPOINT, "asd"));
+                InterestPoint.Category.Infopoint, "asd"));
     }
 
     // TODO MEGNÉZNI

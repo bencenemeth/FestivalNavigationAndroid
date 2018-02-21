@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import bme.aut.hu.festivalnavigationandroid.model.InterestPoint;
+
 /**
  * Created by ben23 on 2018-02-14.
  */
