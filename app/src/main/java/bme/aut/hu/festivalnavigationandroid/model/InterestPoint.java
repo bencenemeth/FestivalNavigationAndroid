@@ -8,21 +8,49 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-import java.util.Calendar;
+import java.lang.reflect.Type;
 
 import bme.aut.hu.festivalnavigationandroid.R;
 
 /**
  * Class for storing the points of interests. Places like entrances, stages, toilets.
  */
-public class InterestPoint extends Point implements Parcelable {
+public class InterestPoint implements Parcelable {
 
+    @SerializedName("id")
+    @Expose
+    private String id;
+    @SerializedName("name")
+    @Expose
     private String name;
+    @SerializedName("type")
+    @Expose
+    private String type;
+    @SerializedName("description")
+    @Expose
+    private String description;
+    @SerializedName("lat")
+    @Expose
+    private double lat;
+    @SerializedName("lon")
+    @Expose
+    private double lon;
+    @SerializedName("open-now")
+    @Expose
+    private boolean openNow;
+
     private MyTime open;
     private MyTime close;
     private Category category;
-    private String extras;;
+    private LatLng location;
+
 
     public enum Category {
         // TODO: IMPLEMENT OTHERS
@@ -34,7 +62,7 @@ public class InterestPoint extends Point implements Parcelable {
         private String name;
         private int imageID;
 
-        private Category(String name, int imageID) {
+        Category(String name, int imageID) {
             this.name = name;
             this.imageID = imageID;
         }
@@ -44,21 +72,46 @@ public class InterestPoint extends Point implements Parcelable {
         }
     }
 
-    public InterestPoint(LatLng location) {
-        super(location);
+    public InterestPoint() {
     }
 
-    public InterestPoint(LatLng location, String name, MyTime open, MyTime close, Category category, String extras) {
-        super(location);
+    // TODO: REMOVE WHEN API IS READY
+    public InterestPoint(String id, double lat, double lon, String name, MyTime open, MyTime close, Category category, String description) {
+        this.id = id;
+        this.location = new LatLng(lat, lon);
         this.name = name;
         this.open = open;
         this.close = close;
         this.category = category;
-        this.extras = extras;
+        this.description = description;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public boolean isOpenNow() {
+        return openNow;
     }
 
     public MyTime getOpen() {
@@ -73,34 +126,84 @@ public class InterestPoint extends Point implements Parcelable {
         return category;
     }
 
-    public String getCategoryName() {
-        return category.toString();
+    public LatLng getLocation() {
+        return location;
     }
 
-    public String getExtras() {
-        return extras;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    /**
-     * Method for determining if a place is open in the given time.
-     *
-     * @param calendar the time right now
-     * @return TRUE if open, FALSE if closed
-     */
-    public boolean isOpen(Calendar calendar) {
-        MyTime temp = new MyTime(calendar.HOUR_OF_DAY, calendar.MINUTE);
-        if (open.compareTo(temp) <= 0 && close.compareTo(temp) == 1 || open.compareTo(temp) >= 0 && close.compareTo(temp) == 1 && open.compareTo(close) == 1)
-            return true;
-        else
-            return false;
+    public void setName(String name) {
+        this.name = name;
     }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
+    }
+
+    public void setOpenNow(boolean openNow) {
+        this.openNow = openNow;
+    }
+
+    public void setOpen(MyTime open) {
+        this.open = open;
+    }
+
+    public void setClose(MyTime close) {
+        this.close = close;
+    }
+
+    // TODO
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public void setLocation(LatLng location) {
+        this.location = location;
+    }
+
+    public void create() {
+        switch (type) {
+            case "stage":
+                this.category = Category.Stage;
+                break;
+            case "infopoint":
+                this.category = Category.Infopoint;
+                break;
+            default:
+                this.category = Category.Stage;
+                break;
+        }
+        this.location = new LatLng(lat, lon);
+    }
+
+    /** PARCELABLE */
 
     protected InterestPoint(Parcel in) {
+        id = in.readString();
         name = in.readString();
+        type = in.readString();
+        description = in.readString();
+        lat = in.readDouble();
+        lon = in.readDouble();
+        openNow = in.readByte() != 0x00;
         open = (MyTime) in.readValue(MyTime.class.getClassLoader());
         close = (MyTime) in.readValue(MyTime.class.getClassLoader());
         category = (Category) in.readValue(Category.class.getClassLoader());
-        extras = in.readString();
+        location = (LatLng) in.readValue(LatLng.class.getClassLoader());
     }
 
     @Override
@@ -110,11 +213,17 @@ public class InterestPoint extends Point implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
         dest.writeString(name);
+        dest.writeString(type);
+        dest.writeString(description);
+        dest.writeDouble(lat);
+        dest.writeDouble(lon);
+        dest.writeByte((byte) (openNow ? 0x01 : 0x00));
         dest.writeValue(open);
         dest.writeValue(close);
         dest.writeValue(category);
-        dest.writeString(extras);
+        dest.writeValue(location);
     }
 
     @SuppressWarnings("unused")

@@ -1,4 +1,4 @@
-package bme.aut.hu.festivalnavigationandroid;
+package bme.aut.hu.festivalnavigationandroid.ui;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,8 +11,10 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
+import bme.aut.hu.festivalnavigationandroid.R;
 import bme.aut.hu.festivalnavigationandroid.adapter.InterestPointAdapter;
 import bme.aut.hu.festivalnavigationandroid.model.InterestPoint;
+import bme.aut.hu.festivalnavigationandroid.model.map.Map;
 
 /**
  * Created by ben23 on 2018-02-14.
@@ -23,8 +25,7 @@ import bme.aut.hu.festivalnavigationandroid.model.InterestPoint;
  */
 public class ListFragment extends Fragment {
 
-
-    private ArrayList<InterestPoint> pois;
+    private Map map;
 
     private RecyclerView recyclerView;
     private InterestPointAdapter adapter;
@@ -34,7 +35,7 @@ public class ListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // TODO: ERROR HANDLING
         if (getArguments() != null)
-            pois = getArguments().getParcelableArrayList("poi");
+            map = getArguments().getParcelable("map");
     }
 
     @Override
@@ -46,17 +47,17 @@ public class ListFragment extends Fragment {
         return view;
     }
 
-    public static ListFragment newInstance(ArrayList<InterestPoint> poi) {
+    public static ListFragment newInstance(Map map) {
         ListFragment fragment = new ListFragment();
         Bundle args = new Bundle();
-        args.putParcelableArrayList("poi", poi);
+        args.putParcelable("map", map);
         fragment.setArguments(args);
         return fragment;
     }
 
     private void initRecyclerView(View view) {
         recyclerView = view.findViewById(R.id.recycleView);
-        adapter = new InterestPointAdapter(pois, this.getContext());
+        adapter = new InterestPointAdapter(map, this.getContext());
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
         recyclerView.setAdapter(adapter);
 
