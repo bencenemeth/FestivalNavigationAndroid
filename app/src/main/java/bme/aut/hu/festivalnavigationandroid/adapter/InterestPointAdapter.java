@@ -1,6 +1,7 @@
 package bme.aut.hu.festivalnavigationandroid.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,13 +9,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import java.util.List;
 
 import bme.aut.hu.festivalnavigationandroid.R;
-import bme.aut.hu.festivalnavigationandroid.model.InterestPoint;
-import bme.aut.hu.festivalnavigationandroid.model.map.Map;
+import bme.aut.hu.festivalnavigationandroid.model.point.InterestPoint;
 
 /**
  * Created by ben23 on 2018-02-17.
@@ -25,21 +26,23 @@ import bme.aut.hu.festivalnavigationandroid.model.map.Map;
  */
 public class InterestPointAdapter extends RecyclerView.Adapter<InterestPointAdapter.InterestPointViewHolder> {
 
-    private Map map;
+    private List<InterestPoint> pois;
     private Context context;
     private LinearLayout llExtraInfo;
+    private int lastSelectedPosition = -1;
     private Button btnStartNavigation;
 
-    public InterestPointAdapter(Map map, Context context) {
-        this.map = map;
+    public InterestPointAdapter(List<InterestPoint> pois, Context context) {
+        this.pois = pois;
         this.context = context;
     }
 
     @Override
     public InterestPointViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.poi_row, parent, false);
-        InterestPointViewHolder viewHolder = new InterestPointViewHolder(view);
-        return viewHolder;
+        //InterestPointViewHolder viewHolder = new InterestPointViewHolder(view);
+        //return viewHolder;
+        return new InterestPointViewHolder(view);
     }
 
     View previousView = null;
@@ -52,22 +55,30 @@ public class InterestPointAdapter extends RecyclerView.Adapter<InterestPointAdap
      */
     @Override
     public void onBindViewHolder(final InterestPointViewHolder holder, final int position) {
-        InterestPoint poi = map.getInterestPoints().get(position);
+        InterestPoint poi = pois.get(position);
         // OTHER OPTION -> CREATE getImageResource METHOD
         // https://github.com/VIAUAC00/Android-labor/tree/master/Labor06
         holder.ivPoiRowIcon.setImageResource(poi.getCategory().getImageID());
         holder.tvPoiRowName.setText(poi.getName());
-        //holder.tvPoiRowOpen.setText(poi.getName());
+        if (poi.isOpenNow()) {
+            holder.tvPoiRowOpen.setText(R.string.open);
+            holder.tvPoiRowOpen.setTextColor(Color.GREEN);
+        } else {
+            holder.tvPoiRowOpen.setText(R.string.closed);
+            holder.tvPoiRowOpen.setTextColor(Color.RED);
+        }
         //holder.tvPoiRowDistanceTo.setText(poi.getName());
+        // TODO: CHANGE TO VIEW POSITION
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(previousView != view)
+                if (previousView != view)
                     hidePoiExtra(previousView);
                 showPoiExtra(view);
                 previousView = view;
             }
         });
+        holder.rbSelectionState.setChecked(lastSelectedPosition == position);
     }
 
     /**
@@ -98,7 +109,7 @@ public class InterestPointAdapter extends RecyclerView.Adapter<InterestPointAdap
      */
     @Override
     public int getItemCount() {
-        return map.getInterestPoints().size();
+        return pois.size();
     }
 
     /**
@@ -110,6 +121,7 @@ public class InterestPointAdapter extends RecyclerView.Adapter<InterestPointAdap
         TextView tvPoiRowName;
         TextView tvPoiRowOpen;
         TextView tvPoiRowDistanceTo;
+        RadioButton rbSelectionState;
 
         public InterestPointViewHolder(View itemView) {
             super(itemView);
@@ -117,6 +129,16 @@ public class InterestPointAdapter extends RecyclerView.Adapter<InterestPointAdap
             tvPoiRowName = itemView.findViewById(R.id.tvPoiRowName);
             tvPoiRowOpen = itemView.findViewById(R.id.tvPoiRowOpen);
             tvPoiRowDistanceTo = itemView.findViewById(R.id.tvPoiRowDistanceTo);
+            rbSelectionState = itemView.findViewById(R.id.rbChecked);
+
+            rbSelectionState.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    lastSelectedPosition = getAdapterPosition();
+                    notifyDataSetChanged();
+                    //btnStartNavigation.setEnabled(true);
+                }
+            });
         }
     }
 }

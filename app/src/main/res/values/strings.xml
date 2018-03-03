@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">FestivalNavigationAndroid</string>
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCcUmYt9JbJfuz7rQoqmwH3J8xXna4ia4s</string>
+    <string name="open">OPEN</string>
+    <string name="closed">CLOSED</string>
+    <string name="location_access_required">GIVE ME LOCATION PLZ</string>
+    <string name="location_access_unavailable">NO LOCATION :(</string>
+    <string name="location_access_granted">LOCATION GRANTED</string>
+    <string name="location_access_denied">LOCATION DENIED</string>
+    <string name="ok">OK</string>
 </resources>

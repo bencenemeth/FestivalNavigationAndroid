@@ -1,9 +1,8 @@
 package bme.aut.hu.festivalnavigationandroid.network;
 
-import java.util.List;
-
-import bme.aut.hu.festivalnavigationandroid.model.InterestPoint;
 import bme.aut.hu.festivalnavigationandroid.model.map.Map;
+import bme.aut.hu.festivalnavigationandroid.model.map.MapContainer;
+import bme.aut.hu.festivalnavigationandroid.model.point.InterestPointContainer;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -15,12 +14,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class NetworkManager {
 
     // TODO: ENDPOINT
-    private static final String ENDPOINT_ADDRESS = "valami";
+    private static final String ENDPOINT_ADDRESS = "http://10.0.2.2:3000/api/v1/";
 
     private static NetworkManager instance;
 
     public static NetworkManager getInstance() {
-        if(instance == null)
+        if (instance == null)
             instance = new NetworkManager();
         return instance;
     }
@@ -36,7 +35,7 @@ public class NetworkManager {
         festivalApi = retrofit.create(FestivalApi.class);
     }
 
-    public Call<List<Map>> getMaps(double lat, double lon) {
+    public Call<MapContainer> getMaps(double lat, double lon) {
         return festivalApi.getMaps(lat, lon);
     }
 
@@ -44,8 +43,11 @@ public class NetworkManager {
         return festivalApi.getMap(mapID);
     }
 
-    public Call<List<InterestPoint>> getInterestPoints(String mapID, boolean open, String type) {
+    /*public Call<InterestPointContainer> getInterestPoints(String mapID, boolean open, String type) {
         return festivalApi.getInterestPoints(mapID, open, type);
-    }
+    }*/
 
+    public Call<InterestPointContainer> getInterestPoints(String mapID) {
+        return festivalApi.getInterestPoints(mapID);
+    }
 }

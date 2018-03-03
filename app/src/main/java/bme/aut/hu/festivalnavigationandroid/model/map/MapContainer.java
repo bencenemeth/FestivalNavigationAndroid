@@ -5,8 +5,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-import bme.aut.hu.festivalnavigationandroid.model.map.Map;
-
 /**
  * Created by ben23 on 2018-02-25.
  */

@@ -1,4 +1,4 @@
-package bme.aut.hu.festivalnavigationandroid.model;
+package bme.aut.hu.festivalnavigationandroid.model.point;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -68,7 +68,9 @@ public class ControlPoint implements Parcelable {
         this.location = location;
     }
 
-    /** PARCELABLE */
+    /**
+     * PARCELABLE
+     */
 
     protected ControlPoint(Parcel in) {
         id = in.readString();

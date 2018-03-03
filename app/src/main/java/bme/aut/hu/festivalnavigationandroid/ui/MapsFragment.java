@@ -12,8 +12,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -21,11 +19,11 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import bme.aut.hu.festivalnavigationandroid.R;
-import bme.aut.hu.festivalnavigationandroid.model.InterestPoint;
+import bme.aut.hu.festivalnavigationandroid.adapter.InterestPointInfoWindowAdapter;
 import bme.aut.hu.festivalnavigationandroid.model.map.Map;
+import bme.aut.hu.festivalnavigationandroid.model.point.InterestPoint;
 
 /**
  * Created by ben23 on 2018-02-14.
@@ -36,6 +34,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = MapsFragment.class.getSimpleName();
 
     private Map map;
+    //private List<InterestPoint> pois;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,6 +42,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         // TODO: ERROR HANDLING
         if (getArguments() != null)
             map = getArguments().getParcelable("map");
+        //pois = getArguments().getParcelableArrayList("pois");
     }
 
     @Override
@@ -54,6 +54,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         return view;
+    }
+
+    public static MapsFragment newInstance(ArrayList<InterestPoint> pois) {
+        MapsFragment fragment = new MapsFragment();
+        Bundle args = new Bundle();
+        args.putParcelableArrayList("pois", pois);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     public static MapsFragment newInstance(Map map) {
@@ -82,6 +90,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         if (!success) {
             Log.e(TAG, "Style parsing failed.");
         }
+
+        mMap.setInfoWindowAdapter(new InterestPointInfoWindowAdapter(getContext()));
 
         // Setting the bounds of the camera
         // TODO: FROM SERVER

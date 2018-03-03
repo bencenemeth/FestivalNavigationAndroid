@@ -1,5 +1,8 @@
 package bme.aut.hu.festivalnavigationandroid.model.map;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -7,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by ben23 on 2018-02-25.
  */
 
-public class TopLeft {
+public class TopLeft implements Parcelable {
 
     @SerializedName("lat")
     @Expose
@@ -18,13 +21,11 @@ public class TopLeft {
 
     /**
      * No args constructor for use in serialization
-     *
      */
     public TopLeft() {
     }
 
     /**
-     *
      * @param lon
      * @param lat
      */
@@ -49,4 +50,37 @@ public class TopLeft {
     public void setLon(double lon) {
         this.lon = lon;
     }
+
+    /**
+     * PARCELABLE
+     */
+
+    protected TopLeft(Parcel in) {
+        lat = in.readDouble();
+        lon = in.readDouble();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeDouble(lat);
+        dest.writeDouble(lon);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<TopLeft> CREATOR = new Parcelable.Creator<TopLeft>() {
+        @Override
+        public TopLeft createFromParcel(Parcel in) {
+            return new TopLeft(in);
+        }
+
+        @Override
+        public TopLeft[] newArray(int size) {
+            return new TopLeft[size];
+        }
+    };
 }

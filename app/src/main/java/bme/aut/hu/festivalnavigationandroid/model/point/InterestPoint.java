@@ -1,4 +1,4 @@
-package bme.aut.hu.festivalnavigationandroid.model;
+package bme.aut.hu.festivalnavigationandroid.model.point;
 
 /**
  * Created by ben23 on 2018-02-14.
@@ -8,16 +8,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.lang.reflect.Type;
-
 import bme.aut.hu.festivalnavigationandroid.R;
+import bme.aut.hu.festivalnavigationandroid.model.MyTime;
 
 /**
  * Class for storing the points of interests. Places like entrances, stages, toilets.
@@ -42,7 +37,7 @@ public class InterestPoint implements Parcelable {
     @SerializedName("lon")
     @Expose
     private double lon;
-    @SerializedName("open-now")
+    @SerializedName("open_now")
     @Expose
     private boolean openNow;
 
@@ -56,7 +51,9 @@ public class InterestPoint implements Parcelable {
         // TODO: IMPLEMENT OTHERS
         //ENTRANCE, STAGE, TOPUPPOINT, TOILET, CAMPING, FOOD, DRINK, SHOP, INFOPOINT;
         Stage("Stage", R.drawable.ic_tv_black_24dp),
-        Infopoint("Infopoint", R.drawable.ic_info_black_24dp);
+        Infopoint("Infopoint", R.drawable.ic_info_black_24dp),
+        Food("Food", R.drawable.ic_local_pizza_black_24dp),
+        Entrance("Entrance", R.drawable.ic_open_in_browser_black_24dp);
 
         // TODO: REVIEW CHANGE TO STRING NAME TO INT ID
         private String name;
@@ -69,6 +66,10 @@ public class InterestPoint implements Parcelable {
 
         public int getImageID() {
             return imageID;
+        }
+
+        public String getName() {
+            return name;
         }
     }
 
@@ -183,6 +184,12 @@ public class InterestPoint implements Parcelable {
             case "infopoint":
                 this.category = Category.Infopoint;
                 break;
+            case "entrance":
+                this.category = Category.Entrance;
+                break;
+            case "food":
+                this.category = Category.Food;
+                break;
             default:
                 this.category = Category.Stage;
                 break;
@@ -190,7 +197,9 @@ public class InterestPoint implements Parcelable {
         this.location = new LatLng(lat, lon);
     }
 
-    /** PARCELABLE */
+    /**
+     * PARCELABLE
+     */
 
     protected InterestPoint(Parcel in) {
         id = in.readString();

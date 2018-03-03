@@ -2,9 +2,10 @@ package bme.aut.hu.festivalnavigationandroid.network;
 
 import java.util.List;
 
-import bme.aut.hu.festivalnavigationandroid.model.ControlPoint;
-import bme.aut.hu.festivalnavigationandroid.model.InterestPoint;
 import bme.aut.hu.festivalnavigationandroid.model.map.Map;
+import bme.aut.hu.festivalnavigationandroid.model.map.MapContainer;
+import bme.aut.hu.festivalnavigationandroid.model.point.ControlPoint;
+import bme.aut.hu.festivalnavigationandroid.model.point.InterestPointContainer;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
@@ -16,12 +17,11 @@ import retrofit2.http.Query;
 
 public interface FestivalApi {
 
-    // TODO: CREATE MAP
-    @GET("/maps")
-    Call<List<Map>> getMaps(@Query("lat") double lat,
-                            @Query("lon") double lng);
+    @GET("maps")
+    Call<MapContainer> getMaps(@Query("lat") double lat,
+                               @Query("lon") double lng);
 
-    @GET("/maps/{mapID}")
+    @GET("maps/{mapID}")
     Call<Map> getMap(@Path("mapID") String mapID);
 
 
@@ -30,10 +30,15 @@ public interface FestivalApi {
     Call<List<ControlPoint>> getControlPoints(@Path("mapID") String mapID);
 
 
+    /*
     @GET("maps/{mapID}/interests")
-    Call<List<InterestPoint>> getInterestPoints(@Path("mapID") String mapID,
-                                                @Query("nowOpen") boolean open,
-                                                @Query("type") String type);
+    Call<InterestPointContainer> getInterestPoints(@Path("mapID") String mapID,
+                                                   @Query("nowOpen") boolean open,
+                                                   @Query("type") String type);
+                                                   */
+
+    @GET("maps/{mapID}/interests")
+    Call<InterestPointContainer> getInterestPoints(@Path("mapID") String mapID);
 
     // TODO: DEVELOP ALGORITHM
     /*

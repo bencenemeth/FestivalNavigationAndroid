@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/llFestivalSelect"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="bme.aut.hu.festivalnavigationandroid.ui.FestivalSelectActivity">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="50dp"
+        android:adjustViewBounds="true"
+        android:alpha="0.2"
+        android:maxHeight="150dp"
+        android:maxWidth="150dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/sziget" />
+
+    <Spinner
+        android:id="@+id/spinnerFestivals"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:id="@+id/btnSelectFestival"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:text="Select" />
+
+
+</LinearLayout>

@@ -11,7 +11,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
-import bme.aut.hu.festivalnavigationandroid.model.InterestPoint;
+import bme.aut.hu.festivalnavigationandroid.model.point.InterestPoint;
 
 /**
  * Created by ben23 on 2018-02-24.
@@ -80,10 +80,17 @@ public class Map implements Parcelable {
     public void create() {
         LatLng northeast = new LatLng(bounds.getTopLeft().getLat(), bounds.getBottomRight().getLon());
         LatLng southwest = new LatLng(bounds.getBottomRight().getLat(), bounds.getTopLeft().getLon());
-        latLngBounds = new LatLngBounds(northeast, southwest);
+        latLngBounds = new LatLngBounds(southwest, northeast);
     }
 
-    /** PARCELABLE */
+    @Override
+    public String toString() {
+        return getName();
+    }
+
+    /**
+     * PARCELABLE
+     */
 
     protected Map(Parcel in) {
         id = in.readString();
