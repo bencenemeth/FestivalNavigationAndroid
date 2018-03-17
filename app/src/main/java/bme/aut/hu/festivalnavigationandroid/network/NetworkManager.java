@@ -43,9 +43,9 @@ public class NetworkManager {
         return festivalApi.getMap(mapID);
     }
 
-    /*public Call<InterestPointContainer> getInterestPoints(String mapID, boolean open, String type) {
+    public Call<InterestPointContainer> getInterestPoints(String mapID, Boolean open, String type) {
         return festivalApi.getInterestPoints(mapID, open, type);
-    }*/
+    }
 
     public Call<InterestPointContainer> getInterestPoints(String mapID) {
         return festivalApi.getInterestPoints(mapID);

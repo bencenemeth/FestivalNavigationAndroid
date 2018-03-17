@@ -7,14 +7,14 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/ivPoiRowIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
+            android:layout_gravity="center"
             tools:src="@drawable/ic_map_black_24dp" />
 
         <LinearLayout
@@ -22,39 +22,38 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="horizontal"
-            android:weightSum="2">
+            android:paddingStart="19dp"
+            android:weightSum="10">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="4.5"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/tvPoiRowName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="#000"
+                    android:textSize="16sp"
                     tools:text="NAME" />
 
                 <TextView
                     android:id="@+id/tvPoiRowOpen"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="OPEN" />
+                    android:textSize="14sp"
+                    tools:text="OPEN" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/tvPoiRowDistanceTo"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_weight="1"
-                android:text="DISTANCE" />
-
-            <RadioButton
-                android:id="@+id/rbChecked"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_weight="5.5"
+                tools:text="DISTANCE" />
 
         </LinearLayout>
 
@@ -65,17 +64,40 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:paddingStart="56dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="asd" />
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_access_time_black_18dp" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="dasdasdas" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="10">
+
+            <TextView
+                android:id="@+id/tvPoiRowOpeningDays"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.5"
+                tools:text="asd" />
+
+            <TextView
+                android:id="@+id/tvPoiRowOpeningHours"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                tools:text="asd" />
+
+            <TextView
+                android:id="@+id/tvPoiRowDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5.5"
+                tools:text="DESCRIPTION" />
+        </LinearLayout>
 
     </LinearLayout>
 </LinearLayout>

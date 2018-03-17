@@ -3,38 +3,55 @@ package bme.aut.hu.festivalnavigationandroid.ui;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.baoyz.widget.PullRefreshLayout;
 
-import java.util.ArrayList;
-
 import bme.aut.hu.festivalnavigationandroid.R;
+import bme.aut.hu.festivalnavigationandroid.adapter.CustomDividerItemDecoration;
 import bme.aut.hu.festivalnavigationandroid.adapter.InterestPointAdapter;
 import bme.aut.hu.festivalnavigationandroid.model.map.Map;
-import bme.aut.hu.festivalnavigationandroid.model.point.InterestPoint;
 
 /**
  * Created by ben23 on 2018-02-14.
  */
 
 /**
- * Fragment for displaying the POIs in a list.
+ * Fragment for displaying the interest points in a list.
  */
 public class ListFragment extends Fragment {
 
-    private OnFragmentInteractionListener mCallback;
+    private Context context;
+
+    private ListFragmentInteractionListener mCallback;
 
     private Map map;
-    //private ArrayList<InterestPoint> pois;
 
     private PullRefreshLayout swipeRefresh;
     private RecyclerView recyclerView;
     private InterestPointAdapter adapter;
+
+    private Button btnStartNavigation;
+
+    // Override the Fragment.onAttach() method to instantiate the ListFragmentInteractionListener
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        // Verify that the host activity implements the callback interface
+        try {
+            mCallback = (ListFragmentInteractionListener) context;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(context.toString()
+                    + " must implement ListFragmentInteractionListener");
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,13 +59,13 @@ public class ListFragment extends Fragment {
         // TODO: ERROR HANDLING
         if (getArguments() != null)
             map = getArguments().getParcelable("map");
-        //pois = getArguments().getParcelableArrayList("pois");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        adapter.notifyDataSetChanged();
+        //adapter.notifyDataSetChanged();
+        mCallback.refreshInterestPoints();
     }
 
     @Override
@@ -56,28 +73,11 @@ public class ListFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_list, container, false);
-        initRecyclerView(view);
+        context = getContext();
+        btnStartNavigation = view.findViewById(R.id.btnStartNavigation);
+        initRecyclerView(view, context);
         updateRecyclerView(view);
         return view;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        try {
-            mCallback = (OnFragmentInteractionListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString());
-        }
-    }
-
-
-    public static ListFragment newInstance(ArrayList<InterestPoint> pois) {
-        ListFragment fragment = new ListFragment();
-        Bundle args = new Bundle();
-        args.putParcelableArrayList("pois", pois);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     public static ListFragment newInstance(Map map) {
@@ -92,11 +92,13 @@ public class ListFragment extends Fragment {
      * Initializing the recyclerview.
      *
      * @param view
+     * @param context
      */
-    private void initRecyclerView(View view) {
-        recyclerView = view.findViewById(R.id.recycleView);
-        adapter = new InterestPointAdapter(map.getInterestPoints(), this.getContext());
-        recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+    private void initRecyclerView(View view, Context context) {
+        recyclerView = view.findViewById(R.id.recyclerView);
+        adapter = new InterestPointAdapter(map.getInterestPoints(), context, recyclerView, btnStartNavigation);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.addItemDecoration(new CustomDividerItemDecoration(context, DividerItemDecoration.VERTICAL, R.drawable.list_item_divider));
         recyclerView.setAdapter(adapter);
     }
 
@@ -113,7 +115,7 @@ public class ListFragment extends Fragment {
              */
             @Override
             public void onRefresh() {
-                mCallback.onFragmentInteraction();
+                mCallback.refreshInterestPoints();
             }
         });
     }
@@ -144,8 +146,8 @@ public class ListFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
+    public interface ListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction();
+        void refreshInterestPoints();
     }
 }

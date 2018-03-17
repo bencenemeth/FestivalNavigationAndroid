@@ -30,12 +30,10 @@ public interface FestivalApi {
     Call<List<ControlPoint>> getControlPoints(@Path("mapID") String mapID);
 
 
-    /*
     @GET("maps/{mapID}/interests")
     Call<InterestPointContainer> getInterestPoints(@Path("mapID") String mapID,
-                                                   @Query("nowOpen") boolean open,
+                                                   @Query("nowOpen") Boolean open,
                                                    @Query("type") String type);
-                                                   */
 
     @GET("maps/{mapID}/interests")
     Call<InterestPointContainer> getInterestPoints(@Path("mapID") String mapID);

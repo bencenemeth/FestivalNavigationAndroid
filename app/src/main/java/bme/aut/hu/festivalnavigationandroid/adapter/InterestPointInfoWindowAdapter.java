@@ -20,10 +20,16 @@ import bme.aut.hu.festivalnavigationandroid.model.point.InterestPoint;
 public class InterestPointInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     private final View interestPointView;
+    // InterestPoint implements ClusterItem interface
+    private InterestPoint clickedClusterItem;
 
     public InterestPointInfoWindowAdapter(Context context) {
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        interestPointView = layoutInflater.inflate(R.layout.infowindow_contents, null);
+        interestPointView = layoutInflater.inflate(R.layout.interestpoint_infowindow_contents, null);
+    }
+
+    public void setClickedClusterItem(InterestPoint clickedClusterItem) {
+        this.clickedClusterItem = clickedClusterItem;
     }
 
     @Override
@@ -33,15 +39,15 @@ public class InterestPointInfoWindowAdapter implements GoogleMap.InfoWindowAdapt
 
     @Override
     public View getInfoContents(Marker marker) {
-        InterestPoint poi = (InterestPoint) marker.getTag();
+        //InterestPoint poi = (InterestPoint) marker.getTag();
         TextView tvPoiName = interestPointView.findViewById(R.id.tvPoiName);
-        tvPoiName.setText(poi.getName());
+        tvPoiName.setText(clickedClusterItem.getName());
         TextView tvCategory = interestPointView.findViewById(R.id.tvPoiCategory);
-        tvCategory.setText(poi.getCategory().getName());
+        tvCategory.setText(clickedClusterItem.getCategory().getName());
         ImageView ivPoiCategoryPicture = interestPointView.findViewById(R.id.ivPoiCategoryPicture);
-        ivPoiCategoryPicture.setImageResource(poi.getCategory().getImageID());
+        ivPoiCategoryPicture.setImageResource(clickedClusterItem.getCategory().getImageID());
         TextView tvPoiOpen = interestPointView.findViewById(R.id.tvPoiOpen);
-        if (poi.isOpenNow()) {
+        if (clickedClusterItem.isOpenNow()) {
             tvPoiOpen.setText(R.string.open);
             tvPoiOpen.setTextColor(Color.GREEN);
         } else {

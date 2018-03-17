@@ -1,17 +1,33 @@
 package bme.aut.hu.festivalnavigationandroid.ui;
 
+import android.annotation.SuppressLint;
+import android.content.pm.ActivityInfo;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
+import bme.aut.hu.festivalnavigationandroid.model.point.InterestPointComparator;
 import bme.aut.hu.festivalnavigationandroid.R;
 import bme.aut.hu.festivalnavigationandroid.model.map.Map;
 import bme.aut.hu.festivalnavigationandroid.model.point.InterestPoint;
@@ -21,104 +37,161 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements ListFragment.OnFragmentInteractionListener {
+public class MainActivity
+        extends AppCompatActivity
+        implements ListFragment.ListFragmentInteractionListener,
+        MapsFragment.MapFragmentInteractionListener,
+        SortDialogFragment.NoticeSortDialogListener,
+        FilterDialogFragment.NoticeFilterDialogListener {
 
+    /**
+     * Fragments
+     */
     private MapsFragment mapsFragment;
     private ListFragment listFragment;
+    private InterestPointFragment interestPointFragment;
 
     private CustomPageAdapter adapter;
+
+    /**
+     * UI elements
+     */
     private ViewPager viewPager;
     private TabLayout tabLayout;
+    private Toolbar mainToolbar;
+    private TextView tvFestivalName;
+    private ImageView toolbarItemFilter;
+    private ImageView toolbarItemSort;
 
     private static final String TAG = "MainActivity";
 
     private Map map;
-    //private ArrayList<InterestPoint> pois;
+    //private List<String> categoryNames;
+    private boolean mapIsReady = false;
+
+    /**
+     * Filters
+     */
+    private Boolean filterOpenNow;
+    private String filterCategoryName;
+
+    /**
+     * Location
+     */
+    private FusedLocationProviderClient mFusedLocationClient;
+
+    /**
+     *
+     */
+    private Handler handler;
+    private int delay;
+    private Runnable runnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        handler = new Handler();
+        delay = 5000;
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         map = getIntent().getParcelableExtra("map");
         map.setInterestPoints(new ArrayList<InterestPoint>());
 
-        adapter = new CustomPageAdapter(getSupportFragmentManager());
-        viewPager = findViewById(R.id.viewPager);
-        viewPager.setAdapter(adapter);
-        tabLayout = findViewById(R.id.tabLayout);
-        tabLayout.setupWithViewPager(viewPager);
-        tabLayout.getTabAt(0).setIcon(R.drawable.ic_map_black_24dp);
-        tabLayout.getTabAt(1).setIcon(R.drawable.ic_format_list_bulleted_black_24dp);
-
-
-        //pois = new ArrayList<>();
-
-        /** MOCK DATA */
-        /*
-        // Map
-        map = new Map();
-        map.setId("map01");
-        map.setName("Sziget Fesztivál 2018");
-        // POI list
-        pois = new ArrayList<>();
-        // Test data
-        pois.add(new InterestPoint("0", 47.552595, 19.055235, "Nagyszínpad",
-                new MyTime(23, 0), new MyTime(12, 0),
-                InterestPoint.Category.Stage, "asd"));
-        pois.add(new InterestPoint("1", 47.550664, 19.054935, "A38",
-                new MyTime(20, 0), new MyTime(21, 0),
-                InterestPoint.Category.Stage, "asd"));
-        pois.add(new InterestPoint("2", 47.551551, 19.051904, "City Centre",
-                new MyTime(0, 0), new MyTime(23, 59),
-                InterestPoint.Category.Infopoint, "asd"));
-        // Adding list to map
-        map.setInterestPoints(pois);
-        map.setLatLngBounds(new LatLngBounds(new LatLng(47.545672, 19.046436), new LatLng(47.560232, 19.062111)));
-        */
-        /** MOCK DATA */
+        setUpToolbar();
+        //categoryNames = new ArrayList<>();
+        instantiateFragments();
+        setUpViewPager();
     }
 
     @Override
     protected void onResume() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getLocation(null);
+                runnable = this;
+                handler.postDelayed(runnable, delay);
+            }
+        }, delay);
         super.onResume();
-        loadInterestPoints(map);
+        loadInterestPoints(map, null, null);
+    }
+
+    @Override
+    protected void onPause() {
+        handler.removeCallbacks(runnable);
+        super.onPause();
     }
 
     /**
-     * Getting the map from the server.
+     * Setting up the Activity's toolbar.
      */
-    private void loadMap() {
-        Call<Map> a = NetworkManager.getInstance().getMap(map.getId());
-        a.enqueue(new Callback<Map>() {
-            @Override
-            public void onResponse(Call<Map> call, Response<Map> response) {
-                Log.d(TAG, "onResponse: " + response.code());
-                // OR response.code == 200
-                if (response.isSuccessful()) {
-                    map = response.body();
-                    map.create();
-                } else {
-                    Toast.makeText(MainActivity.this, "Error: " + response.message(), Toast.LENGTH_SHORT).show();
-                }
-            }
+    private void setUpToolbar() {
+        mainToolbar = findViewById(R.id.mainToolbar);
+        setSupportActionBar(mainToolbar);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        // Setting the name
+        tvFestivalName = findViewById(R.id.tvFesttivalName);
+        tvFestivalName.setText(map.getName());
+
+        // Filter button
+        toolbarItemFilter = findViewById(R.id.toolbarItemFilter);
+        toolbarItemFilter.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFailure(Call<Map> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Error in network request, check LOG", Toast.LENGTH_SHORT).show();
+            public void onClick(View v) {
+                showFilterMenu();
             }
         });
+
+        // Sort button
+        toolbarItemSort = findViewById(R.id.toolbarItemSort);
+        toolbarItemSort.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showSortMenu();
+            }
+        });
+    }
+
+    /**
+     * Instantiating the viewpager's fragments.
+     */
+    private void instantiateFragments() {
+        mapsFragment = MapsFragment.newInstance(map);
+        listFragment = ListFragment.newInstance(map);
+    }
+
+    /**
+     * Setting up the viewpager.
+     */
+    private void setUpViewPager() {
+        // Creating the adapter
+        adapter = new CustomPageAdapter(getSupportFragmentManager());
+        viewPager = findViewById(R.id.viewPager);
+        // Setting the adapter
+        viewPager.setAdapter(adapter);
+        tabLayout = findViewById(R.id.tabLayout);
+        // Setting up the tablayout with the viewpager
+        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.getTabAt(0).setIcon(R.drawable.ic_map_black_24dp);
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_format_list_bulleted_black_24dp);
     }
 
     /**
      * Getting the interest points from the server.
      */
-    /*private void loadInterestPoints() {
-        // TODO: PASSING NULL TO OPENNOW
-        Call<InterestPointContainer> a = NetworkManager.getInstance().getInterestPoints(mapId, true, "stage");
-        a.enqueue(new Callback<InterestPointContainer>() {
+    private void loadInterestPoints(Map map, Boolean openNow, String categoryName) {
+        // Map is unavailable until the response.
+        mapIsReady = false;
+        // Call to the server.
+        NetworkManager.getInstance().getInterestPoints(map.getId(), openNow, categoryName).enqueue(new Callback<InterestPointContainer>() {
             @Override
-            public void onResponse(Call<InterestPointContainer> call, Response<InterestPointContainer> response) {
+            public void onResponse(@NonNull Call<InterestPointContainer> call, @NonNull Response<InterestPointContainer> response) {
                 Log.d(TAG, "onResponse: " + response.code());
                 if (response.isSuccessful()) {
                     fillInterestPoints(response.body());
@@ -128,53 +201,17 @@ public class MainActivity extends AppCompatActivity implements ListFragment.OnFr
             }
 
             @Override
-            public void onFailure(Call<InterestPointContainer> call, Throwable t) {
-                t.printStackTrace();
-                Toast.makeText(MainActivity.this, "Error in network request, check LOG", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }*/
-    private void loadInterestPoints(Map map) {
-        NetworkManager.getInstance().getInterestPoints(map.getId()).enqueue(new Callback<InterestPointContainer>() {
-            @Override
-            public void onResponse(Call<InterestPointContainer> call, Response<InterestPointContainer> response) {
-                Log.d(TAG, "onResponse: " + response.code());
-                if (response.isSuccessful()) {
-                    fillInterestPoints(response.body());
-                } else {
-                    Toast.makeText(MainActivity.this, "Error: " + response.message(), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<InterestPointContainer> call, Throwable t) {
+            public void onFailure(@NonNull Call<InterestPointContainer> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 Toast.makeText(MainActivity.this, "Error in network request, check LOG", Toast.LENGTH_SHORT).show();
             }
         });
     }
-    /*
-    private void loadInterestPoints(String mapId) {
-        Call<InterestPointContainer> call = NetworkManager.getInstance().getInterestPoints(mapId);
-        try {
-            Response<InterestPointContainer> response = call.execute();
-            Log.d(TAG, "onResponse: " + response.code());
-            if(response.isSuccessful()) {
-                fillInterestPoints(response.body());
-            }
-            else
-                Toast.makeText(MainActivity.this, "Error: " + response.message(), Toast.LENGTH_SHORT).show();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(MainActivity.this, "Error in network request, check LOG", Toast.LENGTH_SHORT).show();
-        }
-    }*/
 
     /**
-     * Passing the interest points to the List variable.
+     * Filling up map's interest point list.
      *
-     * @param interestPoints
+     * @param interestPoints InterestPointContainer from the server
      */
     private void fillInterestPoints(InterestPointContainer interestPoints) {
         // TODO: REVIEW
@@ -184,17 +221,128 @@ public class MainActivity extends AppCompatActivity implements ListFragment.OnFr
             temp.create();
             map.getInterestPoints().add(temp);
         }
-        map.create();
+        mapIsReady = true;
         listFragment.onCompletion();
         listFragment.stopRefreshingAnimation();
     }
 
     /**
+     * Getting the last known location.
+     */
+    @SuppressLint("MissingPermission")
+    private void getLocation(final InterestPoint interestPointFromMap) {
+        // Only if the map is loaded from the server
+        if (mapIsReady) {
+            mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+                        // No need for provider
+                        Location temp = new Location("");
+                        // For opening the fragment of the interest point
+                        if (interestPointFromMap != null) {
+                            temp.setLatitude(interestPointFromMap.getLat());
+                            temp.setLongitude(interestPointFromMap.getLon());
+                            interestPointFromMap.setDistanceTo(location.distanceTo(temp));
+                        }
+                        // Looping through the interest points.
+                        for (InterestPoint interestPoint : map.getInterestPoints()) {
+                            // Create a location object from the point's lat and lon
+                            temp.setLatitude(interestPoint.getLat());
+                            temp.setLongitude(interestPoint.getLon());
+                            // Calculating the distance
+                            interestPoint.setDistanceTo(location.distanceTo(temp));
+                        }
+                        // Calls notifyDataSetChanged
+                        listFragment.onCompletion();
+                    }
+                }
+            });
+        }
+    }
+
+    /*private void loadCategoryNames(List<InterestPoint> interestPoints) {
+        categoryNames.clear();
+        for(InterestPoint iter : interestPoints) {
+            for(String s : categoryNames) {
+                if(iter.getCategory().getName().equals(s)) {
+                    break;
+                }
+            }
+            categoryNames.add(iter.getCategory().getName());
+        }
+    }*/
+
+    /**
+     * Sorting the interest points.
+     *
+     * @param sortMode sorting mode (0: alphabetical, 1: distance)
+     */
+    private void sortInterestPoints(int sortMode) {
+        Collections.sort(map.getInterestPoints(), new InterestPointComparator(sortMode));
+        listFragment.onCompletion();
+    }
+
+    /**
+     * Showing the filter dialog.
+     */
+    public void showFilterMenu() {
+        //FilterDialogFragment filterDialogFragment = FilterDialogFragment.newInstance();
+        FilterDialogFragment filterDialogFragment = new FilterDialogFragment();
+        filterDialogFragment.show(getSupportFragmentManager(), "Filter");
+    }
+
+    /**
+     * Showing the sorting dialog.
+     */
+    private void showSortMenu() {
+        SortDialogFragment sortDialogFragment = new SortDialogFragment();
+        sortDialogFragment.show(getSupportFragmentManager(), "Sort");
+    }
+
+    /*private void refreshInterestPointFragment() {
+        interestPointFragment = (InterestPointFragment) getSupportFragmentManager().findFragmentByTag("interestPointFragment");
+        getLocation(interestPointFragment.getInterestPoint());
+    }*/
+
+    /**
      * The fragment calls MainActivity to refresh the interest points.
      */
     @Override
-    public void onFragmentInteraction() {
-        loadInterestPoints(map);
+    public void refreshInterestPoints() {
+        // Null filters can be passed to server.
+        loadInterestPoints(map, filterOpenNow, filterCategoryName);
+    }
+
+    @Override
+    public void openInterestPointFragment(InterestPoint interestPoint) {
+        getLocation(interestPoint);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.llContainer, InterestPointFragment.newInstance(interestPoint), "interestPointFragment").addToBackStack(null).commit();
+    }
+
+    /**
+     * Sorting dialog calls to sort the points.
+     *
+     * @param sortMode sorting mode (0: alphabetical, 1: distance)
+     */
+    @Override
+    public void onSortDialogPositiveClick(int sortMode) {
+        sortInterestPoints(sortMode);
+    }
+
+    /**
+     * Filtering dialog calls to filter the points.
+     *
+     * @param open     the state of the point
+     * @param category the category of the point
+     */
+    @Override
+    public void onFilterDialogPositiveClick(Boolean open, String category) {
+        // Store filters, used on refresh.
+        filterOpenNow = open;
+        filterCategoryName = category;
+        refreshInterestPoints();
     }
 
     private class CustomPageAdapter extends FragmentPagerAdapter {
@@ -205,16 +353,14 @@ public class MainActivity extends AppCompatActivity implements ListFragment.OnFr
 
         @Override
         public Fragment getItem(int position) {
+            // TODO: PLACE newInstance ELSEWHERE
             switch (position) {
                 case 0:
-                    mapsFragment = MapsFragment.newInstance(map);
                     return mapsFragment;
                 case 1:
-                    listFragment = ListFragment.newInstance(map);
                     return listFragment;
                 default:
                     return null;
-                //return ListFragment.newInstance(pois);
             }
         }
 
@@ -225,14 +371,15 @@ public class MainActivity extends AppCompatActivity implements ListFragment.OnFr
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
+            /*switch (position) {
                 case 0:
                     return "Map";
                 case 1:
                     return "List";
                 default:
                     return "Error";
-            }
+            }*/
+            return null;
         }
     }
 }

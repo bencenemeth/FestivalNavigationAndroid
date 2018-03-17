@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#5e35b1</color>
+    <color name="colorPrimaryDark">#5e35b1</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="parklPurple">#5b3ead</color>
+
+    <color name="colorApp">#3F51B5</color>
+    <color name="colorAppDark">#303F9F</color>
+    <color name="colorPrimary2">#FFAA00</color>
+    <color name="colorPrimaryDark2">#ED9E00</color>
 
     <color name="colorMapsNavigation">#4286F4</color>
     <color name="white">#FFFFFF</color>
+    <color name="Norbi">#8B0000</color>
 </resources>
