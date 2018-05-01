@@ -1,8 +1,12 @@
 package bme.aut.hu.festivalnavigationandroid.ui;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -26,23 +30,31 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
+import bme.aut.hu.festivalnavigationandroid.adapter.InterestPointAdapter;
+import bme.aut.hu.festivalnavigationandroid.model.point.ControlPoint;
+import bme.aut.hu.festivalnavigationandroid.model.point.ControlPointContainer;
 import bme.aut.hu.festivalnavigationandroid.model.point.InterestPointComparator;
 import bme.aut.hu.festivalnavigationandroid.R;
 import bme.aut.hu.festivalnavigationandroid.model.map.Map;
 import bme.aut.hu.festivalnavigationandroid.model.point.InterestPoint;
 import bme.aut.hu.festivalnavigationandroid.model.point.InterestPointContainer;
+import bme.aut.hu.festivalnavigationandroid.model.time.OpeningHours;
 import bme.aut.hu.festivalnavigationandroid.network.NetworkManager;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static bme.aut.hu.festivalnavigationandroid.ui.FestivalSelectActivity.NIGHTMODE;
 
 public class MainActivity
         extends AppCompatActivity
         implements ListFragment.ListFragmentInteractionListener,
         MapsFragment.MapFragmentInteractionListener,
         SortDialogFragment.NoticeSortDialogListener,
-        FilterDialogFragment.NoticeFilterDialogListener {
+        FilterDialogFragment.NoticeFilterDialogListener,
+        InterestPointAdapter.AdapterChangeListener {
 
     /**
      * Fragments
@@ -60,6 +72,7 @@ public class MainActivity
     private TabLayout tabLayout;
     private Toolbar mainToolbar;
     private TextView tvFestivalName;
+    private ImageView toolbarBackButton;
     private ImageView toolbarItemFilter;
     private ImageView toolbarItemSort;
 
@@ -76,9 +89,20 @@ public class MainActivity
     private String filterCategoryName;
 
     /**
+     * Sort mode
+     */
+    public static int SORT_MODE = -1;
+
+    /**
+     * Selected point's position in the list
+     */
+    public static int SELECTED_POINT_POSITION = -1;
+
+    /**
      * Location
      */
     private FusedLocationProviderClient mFusedLocationClient;
+    public static Location MY_LOCATION;
 
     /**
      *
@@ -99,11 +123,15 @@ public class MainActivity
 
         map = getIntent().getParcelableExtra("map");
         map.setInterestPoints(new ArrayList<InterestPoint>());
+        // No need for provider
+        MY_LOCATION = new Location("");
 
         setUpToolbar();
         //categoryNames = new ArrayList<>();
         instantiateFragments();
         setUpViewPager();
+        if(NIGHTMODE)
+            enableNightMode();
     }
 
     @Override
@@ -111,7 +139,7 @@ public class MainActivity
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                getLocation(null);
+                getLocation();
                 runnable = this;
                 handler.postDelayed(runnable, delay);
             }
@@ -126,6 +154,7 @@ public class MainActivity
         super.onPause();
     }
 
+
     /**
      * Setting up the Activity's toolbar.
      */
@@ -134,6 +163,15 @@ public class MainActivity
         setSupportActionBar(mainToolbar);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        // Setting the back button
+        toolbarBackButton = findViewById(R.id.toolbarBackButton);
+        toolbarBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.super.onBackPressed();
+            }
+        });
 
         // Setting the name
         tvFestivalName = findViewById(R.id.tvFesttivalName);
@@ -182,6 +220,14 @@ public class MainActivity
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_format_list_bulleted_black_24dp);
     }
 
+    public void enableNightMode() {
+        setTheme(R.style.AppThemeNightMode);
+        mainToolbar.setBackgroundColor(Color.parseColor("#000000"));
+        tabLayout.setBackgroundColor(Color.parseColor("#212121"));
+        tabLayout.getTabAt(0).setIcon(R.drawable.ic_map_white_24dp);
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_format_list_bulleted_white_24dp);
+    }
+
     /**
      * Getting the interest points from the server.
      */
@@ -219,10 +265,12 @@ public class MainActivity
         for (int i = 0; i < interestPoints.getPois().size(); i++) {
             InterestPoint temp = interestPoints.getPois().get(i);
             temp.create();
+            setDistanceTo(temp);
             map.getInterestPoints().add(temp);
         }
         mapIsReady = true;
-        listFragment.onCompletion();
+        sortInterestPoints(SORT_MODE);
+        //listFragment.onCompletion();
         listFragment.stopRefreshingAnimation();
     }
 
@@ -230,29 +278,15 @@ public class MainActivity
      * Getting the last known location.
      */
     @SuppressLint("MissingPermission")
-    private void getLocation(final InterestPoint interestPointFromMap) {
+    private void getLocation() {
         // Only if the map is loaded from the server
         if (mapIsReady) {
             mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
-                    if (location != null) {
-                        // No need for provider
-                        Location temp = new Location("");
-                        // For opening the fragment of the interest point
-                        if (interestPointFromMap != null) {
-                            temp.setLatitude(interestPointFromMap.getLat());
-                            temp.setLongitude(interestPointFromMap.getLon());
-                            interestPointFromMap.setDistanceTo(location.distanceTo(temp));
-                        }
-                        // Looping through the interest points.
-                        for (InterestPoint interestPoint : map.getInterestPoints()) {
-                            // Create a location object from the point's lat and lon
-                            temp.setLatitude(interestPoint.getLat());
-                            temp.setLongitude(interestPoint.getLon());
-                            // Calculating the distance
-                            interestPoint.setDistanceTo(location.distanceTo(temp));
-                        }
+                    if(location != null) {
+                        MY_LOCATION = location;
+                        setDistanceTo(null);
                         // Calls notifyDataSetChanged
                         listFragment.onCompletion();
                     }
@@ -261,24 +295,99 @@ public class MainActivity
         }
     }
 
-    /*private void loadCategoryNames(List<InterestPoint> interestPoints) {
-        categoryNames.clear();
-        for(InterestPoint iter : interestPoints) {
-            for(String s : categoryNames) {
-                if(iter.getCategory().getName().equals(s)) {
-                    break;
+    @SuppressLint("MissingPermission")
+    /*private void getLocation() {
+        if (mapIsReady) {
+            LocationManager mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            //boolean b = mLocationManager.getProvider(LocationManager.GPS_PROVIDER).supportsBearing();
+            LocationListener mLocationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    MY_LOCATION = location;
+                    setDistanceTo(null);
+                    // Calls notifyDataSetChanged
+                    listFragment.onCompletion();
+                }
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                }
+            };
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
+        }
+    }/*
+
+    /**
+     * Setting the distance from own location to the points.
+     *
+     * @param interestPointFromMap      setting only 1 point's location
+     */
+    private void setDistanceTo(final InterestPoint interestPointFromMap) {
+        Location temp = new Location("");
+        if (interestPointFromMap != null) {
+            temp.setLatitude(interestPointFromMap.getLat());
+            temp.setLongitude(interestPointFromMap.getLon());
+            interestPointFromMap.setDistanceTo(MY_LOCATION.distanceTo(temp));
+        }
+        // Looping through the interest points.
+        for (InterestPoint interestPoint : map.getInterestPoints()) {
+            // Create a location object from the point's lat and lon
+            temp.setLatitude(interestPoint.getLat());
+            temp.setLongitude(interestPoint.getLon());
+            // Calculating the distance
+            interestPoint.setDistanceTo(MY_LOCATION.distanceTo(temp));
+        }
+    }
+
+    private void startNavigation(final InterestPoint destinationPoint) {
+        // Map is unavailable until the response.
+        mapIsReady = false;
+        if(destinationPoint == null) {
+            Toast.makeText(MainActivity.this, "Error: No destination point given!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // Network call
+        NetworkManager.getInstance().navigation(MY_LOCATION.getLatitude(), MY_LOCATION.getLongitude(), destinationPoint.getId()).enqueue(new Callback<ControlPointContainer>() {
+            @Override
+            public void onResponse(@NonNull Call<ControlPointContainer> call, @NonNull Response<ControlPointContainer> response) {
+                if(response.isSuccessful()) {
+                    mapsFragment.startNavigation(response.body(), destinationPoint);
+                    mapsFragment.setSelectedPoint(destinationPoint);
+                } else {
+                    Toast.makeText(MainActivity.this, "Error: " + response.message(), Toast.LENGTH_SHORT).show();
                 }
             }
-            categoryNames.add(iter.getCategory().getName());
-        }
-    }*/
+
+            @Override
+            public void onFailure(@NonNull Call<ControlPointContainer> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Toast.makeText(MainActivity.this, "Error in network request, check LOG", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     /**
      * Sorting the interest points.
      *
-     * @param sortMode sorting mode (0: alphabetical, 1: distance)
+     * @param sortMode       sorting mode (0: alphabetical, 1: distance)
      */
     private void sortInterestPoints(int sortMode) {
+        if(sortMode == -1) {
+            listFragment.onCompletion();
+            return;
+        }
+        SORT_MODE = sortMode;
         Collections.sort(map.getInterestPoints(), new InterestPointComparator(sortMode));
         listFragment.onCompletion();
     }
@@ -302,40 +411,66 @@ public class MainActivity
 
     /*private void refreshInterestPointFragment() {
         interestPointFragment = (InterestPointFragment) getSupportFragmentManager().findFragmentByTag("interestPointFragment");
-        getLocation(interestPointFragment.getInterestPoint());
+        getLatLng(interestPointFragment.getInterestPoint());
     }*/
 
     /**
-     * The fragment calls MainActivity to refresh the interest points.
+     * The ListFragment calls MainActivity to refresh the interest points.
      */
     @Override
     public void refreshInterestPoints() {
         // Null filters can be passed to server.
+        getLocation();
         loadInterestPoints(map, filterOpenNow, filterCategoryName);
     }
 
+    /**
+     * The ListFragment calls MainActivity to switch to MapsFragment and start navigation.
+
+     */
+    @Override
+    public void switchPage() {
+        viewPager.setCurrentItem(0, true);
+        // TODO: USE
+        if(SELECTED_POINT_POSITION != -1)
+            startNavigation(map.getInterestPoints().get(SELECTED_POINT_POSITION));
+    }
+
+    /**
+     * The MapsFragment calls MainActivity to start the navigation.
+     *
+     * @param destinationPoint      destination point
+     */
+    public void callForNavigation(InterestPoint destinationPoint) {
+        startNavigation(destinationPoint);
+    }
+
+    /**
+     * The MapsFragment calls MainActivity to open the InterestPointFragment.
+     *
+     * @param interestPoint         the selected point
+     */
     @Override
     public void openInterestPointFragment(InterestPoint interestPoint) {
-        getLocation(interestPoint);
+        //getLatLng(interestPoint);
+        setDistanceTo(interestPoint);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.llContainer, InterestPointFragment.newInstance(interestPoint), "interestPointFragment").addToBackStack(null).commit();
     }
 
     /**
      * Sorting dialog calls to sort the points.
-     *
-     * @param sortMode sorting mode (0: alphabetical, 1: distance)
      */
     @Override
-    public void onSortDialogPositiveClick(int sortMode) {
-        sortInterestPoints(sortMode);
+    public void onSortDialogPositiveClick() {
+        sortInterestPoints(SORT_MODE);
     }
 
     /**
      * Filtering dialog calls to filter the points.
      *
-     * @param open     the state of the point
-     * @param category the category of the point
+     * @param open                      the state of the point
+     * @param category                  the category of the point
      */
     @Override
     public void onFilterDialogPositiveClick(Boolean open, String category) {
@@ -343,6 +478,16 @@ public class MainActivity
         filterOpenNow = open;
         filterCategoryName = category;
         refreshInterestPoints();
+    }
+
+    /**
+     * Selecting a point in the list.
+     *
+     * @param selectedPointPosition     selected point's position in the list
+     */
+    @Override
+    public void selectPoint(int selectedPointPosition) {
+        listFragment.selectPoint(selectedPointPosition);
     }
 
     private class CustomPageAdapter extends FragmentPagerAdapter {
