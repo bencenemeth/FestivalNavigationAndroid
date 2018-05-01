@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,13 +28,16 @@ import bme.aut.hu.festivalnavigationandroid.model.time.OpeningHours;
 public class InterestPointFragment extends Fragment {
 
     private InterestPoint interestPoint;
-    private ImageView ivPoiRowIcon;
-    TextView tvPoiRowName;
-    TextView tvPoiRowOpen;
-    TextView tvPoiRowDistanceTo;
-    TextView tvPoiRowOpeningDays;
-    TextView tvPoiRowOpeningHours;
-    TextView tvPoiRowDescription;
+    Toolbar infoFragmentToolbar;
+    TextView tvInfoFragmentPointName;
+    ImageView ivInfoFragmentPointImage;
+    ImageView ivInfoFragmentPointCategory;
+    TextView tvInfoFragmentPointCategory;
+    TextView tvInfoFragmentPointOpenNow;
+    TextView tvInfoFragmentPointDistanceTo;
+    TextView tvInfoFragmentPointOpeningDays;
+    TextView tvInfoFragmentPointOpeningHours;
+    TextView tvInfoFragmentPointDescription;
 
     public InterestPoint getInterestPoint() {
         return interestPoint;
@@ -51,11 +56,10 @@ public class InterestPointFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_interestpoint, container, false);
+        setUpToolbar(view);
         fillDialog(view);
         return view;
     }
-
-
 
     public static InterestPointFragment newInstance(InterestPoint interestPoint) {
         InterestPointFragment fragment = new InterestPointFragment();
@@ -65,24 +69,45 @@ public class InterestPointFragment extends Fragment {
         return fragment;
     }
 
-    private void fillDialog(View view) {
-        ivPoiRowIcon = view.findViewById(R.id.ivPoiRowIcon);
-        tvPoiRowName = view.findViewById(R.id.tvPoiRowName);
-        tvPoiRowOpen = view.findViewById(R.id.tvPoiRowOpen);
-        tvPoiRowDistanceTo = view.findViewById(R.id.tvPoiRowDistanceTo);
-        tvPoiRowOpeningDays = view.findViewById(R.id.tvPoiRowOpeningDays);
-        tvPoiRowOpeningHours = view.findViewById(R.id.tvPoiRowOpeningHours);
-        tvPoiRowDescription = view.findViewById(R.id.tvPoiRowDescription);
+    private void setUpToolbar(View view) {
+        infoFragmentToolbar = view.findViewById(R.id.infoFragmentToolbar);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.setSupportActionBar(infoFragmentToolbar);
+        if (activity.getSupportActionBar() != null)
+            activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+    }
 
-        ivPoiRowIcon.setImageResource(interestPoint.getCategory().getImageID());
-        tvPoiRowName.setText(interestPoint.getName());
+    private void fillDialog(View view) {
+        tvInfoFragmentPointName = view.findViewById(R.id.tvInfoFragmentPointName);
+        ivInfoFragmentPointImage = view.findViewById(R.id.ivInfoFragmentPointImage);
+        ivInfoFragmentPointCategory = view.findViewById(R.id.ivInfoFragmentPointCategory);
+        tvInfoFragmentPointCategory = view.findViewById(R.id.tvInfoFragmentPointCategory);
+        tvInfoFragmentPointOpenNow = view.findViewById(R.id.tvInfoFragmentPointOpenNow);
+        tvInfoFragmentPointDistanceTo = view.findViewById(R.id.tvInfoFragmentPointDistanceTo);
+        tvInfoFragmentPointOpeningDays = view.findViewById(R.id.tvInfoFragmentPointOpeningDays);
+        tvInfoFragmentPointOpeningHours = view.findViewById(R.id.tvInfoFragmentPointOpeningHours);
+        tvInfoFragmentPointDescription = view.findViewById(R.id.tvInfoFragmentPointDescription);
+
+        // Name
+        tvInfoFragmentPointName.setText(interestPoint.getName());
+
+        // Category
+        ivInfoFragmentPointCategory.setImageResource(interestPoint.getCategory().getImageID());
+        tvInfoFragmentPointCategory.setText(interestPoint.getCategory().getName());
+
+        // Open now
         if (interestPoint.isOpenNow()) {
-            tvPoiRowOpen.setText(R.string.open);
-            tvPoiRowOpen.setTextColor(Color.GREEN);
+            tvInfoFragmentPointOpenNow.setText(R.string.open);
+            tvInfoFragmentPointOpenNow.setTextColor(Color.GREEN);
         } else {
-            tvPoiRowOpen.setText(R.string.closed);
-            tvPoiRowOpen.setTextColor(Color.RED);
+            tvInfoFragmentPointOpenNow.setText(R.string.closed);
+            tvInfoFragmentPointOpenNow.setTextColor(Color.RED);
         }
+
+        // Distance to
+        setTvPoiRowDistanceTo(interestPoint.getDistanceTo());
+
+        // Opening hours
         StringBuilder builderDays = new StringBuilder();
         StringBuilder builderHours = new StringBuilder();
         SimpleDateFormat sdfDays = new SimpleDateFormat("MM/dd", Locale.US);
@@ -97,13 +122,14 @@ public class InterestPointFragment extends Fragment {
             builderHours.append(sdfHours.format(openingHours.get(i).getCloseCal().getTime()));
             builderHours.append("\n");
         }
-        tvPoiRowOpeningDays.setText(builderDays.toString());
-        tvPoiRowOpeningHours.setText(builderHours.toString());
-        setTvPoiRowDistanceTo(interestPoint.getDistanceTo());
-        tvPoiRowDescription.setText(interestPoint.getDescription());
+        tvInfoFragmentPointOpeningDays.setText(builderDays.toString());
+        tvInfoFragmentPointOpeningHours.setText(builderHours.toString());
+
+        // Description
+        tvInfoFragmentPointDescription.setText(interestPoint.getDescription());
     }
 
     public void setTvPoiRowDistanceTo(Float distanceTo) {
-        tvPoiRowDistanceTo.setText(String.valueOf(Math.round(distanceTo)) + " m");
+        tvInfoFragmentPointDistanceTo.setText(String.valueOf(Math.round(distanceTo)) + " m");
     }
 }

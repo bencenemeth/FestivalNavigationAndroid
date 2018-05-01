@@ -5,6 +5,7 @@ import java.util.List;
 import bme.aut.hu.festivalnavigationandroid.model.map.Map;
 import bme.aut.hu.festivalnavigationandroid.model.map.MapContainer;
 import bme.aut.hu.festivalnavigationandroid.model.point.ControlPoint;
+import bme.aut.hu.festivalnavigationandroid.model.point.ControlPointContainer;
 import bme.aut.hu.festivalnavigationandroid.model.point.InterestPointContainer;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -38,11 +39,10 @@ public interface FestivalApi {
     @GET("maps/{mapID}/interests")
     Call<InterestPointContainer> getInterestPoints(@Path("mapID") String mapID);
 
-    // TODO: DEVELOP ALGORITHM
-    /*
-    @GET("maps/{mapID}/navigation")
-    Call<List<ControlPoint>> navigation(@Query("current-lat") double lat,
-                                 @Query("current-lon") double lng,
-                                 @Query("destination-point-id") String id);
-                                 */
+
+    @GET("navigation")
+    Call<ControlPointContainer> navigation(@Query("current_lat") double lat,
+                                           @Query("current_lon") double lng,
+                                           @Query("destination_point_id") String id);
+
 }

@@ -19,6 +19,8 @@ import java.util.Locale;
 import bme.aut.hu.festivalnavigationandroid.R;
 import bme.aut.hu.festivalnavigationandroid.model.point.InterestPoint;
 import bme.aut.hu.festivalnavigationandroid.model.time.OpeningHours;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by ben23 on 2018-02-17.
@@ -29,18 +31,26 @@ import bme.aut.hu.festivalnavigationandroid.model.time.OpeningHours;
  */
 public class InterestPointAdapter extends RecyclerView.Adapter<InterestPointAdapter.InterestPointViewHolder> {
 
+    private AdapterChangeListener mCallback;
+
     private List<InterestPoint> pois;
     private Context context;
     private int lastSelectedPosition = -1;
-    private Button btnStartNavigation;
 
     private RecyclerView recyclerView;
 
-    public InterestPointAdapter(List<InterestPoint> pois, Context context, RecyclerView recyclerView, Button btnStartNavigation) {
+    public InterestPointAdapter(List<InterestPoint> pois, Context context, RecyclerView recyclerView) {
         this.pois = pois;
         this.context = context;
         this.recyclerView = recyclerView;
-        this.btnStartNavigation = btnStartNavigation;
+
+        try {
+            mCallback = (AdapterChangeListener) context;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(context.toString()
+                    + " must implement ListFragmentInteractionListener");
+        }
     }
 
     @Override
@@ -92,12 +102,12 @@ public class InterestPointAdapter extends RecyclerView.Adapter<InterestPointAdap
     private void setExpand(final InterestPointViewHolder holder, final int position, InterestPoint interestPoint) {
         final boolean isExpanded = (position == lastSelectedPosition);
         holder.llExtraInfo.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
-        btnStartNavigation.setEnabled(isExpanded);
         holder.itemView.setActivated(isExpanded);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 lastSelectedPosition = isExpanded ? -1 : position;
+                mCallback.selectPoint(lastSelectedPosition);
                 TransitionManager.beginDelayedTransition(recyclerView);
                 notifyDataSetChanged();
                 // ??????????
@@ -137,6 +147,10 @@ public class InterestPointAdapter extends RecyclerView.Adapter<InterestPointAdap
     @Override
     public int getItemCount() {
         return pois.size();
+    }
+
+    public interface AdapterChangeListener {
+        void selectPoint(int position);
     }
 
     /**

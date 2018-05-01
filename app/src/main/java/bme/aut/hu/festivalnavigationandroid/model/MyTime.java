@@ -4,21 +4,45 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by ben23 on 2018-02-14.
  */
 
 public class MyTime implements Parcelable {
+    private int year;
+    private int month;
+    private int day;
     private int hour;
     private int minute;
+    private int second;
 
     public MyTime() {
     }
 
-    public MyTime(int hour, int minute) {
-        this.hour = hour;
-        this.minute = minute;
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getDay() {
+        return day;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
     }
 
     public int getHour() {
@@ -35,6 +59,14 @@ public class MyTime implements Parcelable {
 
     public void setMinute(int minute) {
         this.minute = minute;
+    }
+
+    public int getSecond() {
+        return second;
+    }
+
+    public void setSecond(int second) {
+        this.second = second;
     }
 
     /**
@@ -75,8 +107,12 @@ public class MyTime implements Parcelable {
     }
 
     protected MyTime(Parcel in) {
+        year = in.readInt();
+        month = in.readInt();
+        day = in.readInt();
         hour = in.readInt();
         minute = in.readInt();
+        second = in.readInt();
     }
 
     @Override
@@ -86,8 +122,12 @@ public class MyTime implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(year);
+        dest.writeInt(month);
+        dest.writeInt(day);
         dest.writeInt(hour);
         dest.writeInt(minute);
+        dest.writeInt(second);
     }
 
     @SuppressWarnings("unused")

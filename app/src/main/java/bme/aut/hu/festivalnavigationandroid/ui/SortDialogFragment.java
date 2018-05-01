@@ -14,6 +14,8 @@ import android.widget.RadioGroup;
 
 import bme.aut.hu.festivalnavigationandroid.R;
 
+import static bme.aut.hu.festivalnavigationandroid.ui.MainActivity.SORT_MODE;
+
 /**
  * Created by ben23 on 2018-03-17.
  */
@@ -25,8 +27,6 @@ public class SortDialogFragment extends DialogFragment {
     private Context context;
 
     private RadioGroup rgSort;
-
-    private int sortMode = -1;
 
     // Override the Fragment.onAttach() method to instantiate the NoticeFilterDialogListener
     @Override
@@ -67,14 +67,17 @@ public class SortDialogFragment extends DialogFragment {
      */
     private void setUpRadioGroup(View view) {
         rgSort = view.findViewById(R.id.rgSort);
+        // If already sorted
+        if(SORT_MODE != -1)
+            ((RadioButton)rgSort.getChildAt(SORT_MODE)).setChecked(true);
         rgSort.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 RadioButton rb = group.findViewById(checkedId);
                 if (rb.getTag().equals("alpha"))
-                    sortMode = 0;
+                    SORT_MODE = 0;
                 else if (rb.getTag().equals("distance"))
-                    sortMode = 1;
+                    SORT_MODE = 1;
             }
         });
     }
@@ -89,7 +92,7 @@ public class SortDialogFragment extends DialogFragment {
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mCallback.onSortDialogPositiveClick(sortMode);
+                mCallback.onSortDialogPositiveClick();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -100,6 +103,6 @@ public class SortDialogFragment extends DialogFragment {
     }
 
     public interface NoticeSortDialogListener {
-        public void onSortDialogPositiveClick(int sortMode);
+        public void onSortDialogPositiveClick();
     }
 }

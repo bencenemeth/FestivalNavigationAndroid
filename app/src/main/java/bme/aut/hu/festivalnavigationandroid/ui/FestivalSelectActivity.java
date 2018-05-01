@@ -40,6 +40,8 @@ public class FestivalSelectActivity extends AppCompatActivity implements Activit
 
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0;
 
+    public static boolean NIGHTMODE = false;
+
     private View llFestivalSelect;
 
     private Map map;
@@ -49,8 +51,11 @@ public class FestivalSelectActivity extends AppCompatActivity implements Activit
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
+        if(NIGHTMODE)
+            setTheme(R.style.AppThemeNightMode);
+        else
+            setTheme(R.style.AppTheme);
         setContentView(R.layout.activity_festival_select);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 

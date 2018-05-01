@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.SimpleTimeZone;
@@ -71,11 +72,12 @@ public class OpeningHours implements Parcelable {
     public void setCalendars() throws ParseException {
         //gson =  new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
         //openCal = gson.fromJson(open, new TypeToken<Calendar>() {}.getType());
+
         openCal = Calendar.getInstance();
         closeCal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
-        String openTemp = open.replace("Z", "+02:00");
-        String closeTemp = close.replace("Z", "+02:00");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault());
+        String openTemp = open.replace("Z", "+00:00");
+        String closeTemp = close.replace("Z", "+00:00");
         try {
             openTemp = openTemp.substring(0, 22) + openTemp.substring(23);
             closeTemp = closeTemp.substring(0, 22) + closeTemp.substring(23);

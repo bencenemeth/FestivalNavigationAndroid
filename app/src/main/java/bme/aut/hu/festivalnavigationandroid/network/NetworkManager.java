@@ -2,6 +2,7 @@ package bme.aut.hu.festivalnavigationandroid.network;
 
 import bme.aut.hu.festivalnavigationandroid.model.map.Map;
 import bme.aut.hu.festivalnavigationandroid.model.map.MapContainer;
+import bme.aut.hu.festivalnavigationandroid.model.point.ControlPointContainer;
 import bme.aut.hu.festivalnavigationandroid.model.point.InterestPointContainer;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -14,7 +15,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class NetworkManager {
 
     // TODO: ENDPOINT
-    private static final String ENDPOINT_ADDRESS = "http://10.0.2.2:3000/api/v1/";
+    //private static final String ENDPOINT_ADDRESS = "http://10.0.2.2:3000/api/v1/";
+    private static final String ENDPOINT_ADDRESS = "http://192.168.0.100:3000/api/v1/";
 
     private static NetworkManager instance;
 
@@ -49,5 +51,9 @@ public class NetworkManager {
 
     public Call<InterestPointContainer> getInterestPoints(String mapID) {
         return festivalApi.getInterestPoints(mapID);
+    }
+
+    public Call<ControlPointContainer> navigation(double lat, double lon, String pointID) {
+        return festivalApi.navigation(lat, lon, pointID);
     }
 }
