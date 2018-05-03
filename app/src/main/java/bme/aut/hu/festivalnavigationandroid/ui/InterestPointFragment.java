@@ -29,6 +29,7 @@ public class InterestPointFragment extends Fragment {
 
     private InterestPoint interestPoint;
     Toolbar infoFragmentToolbar;
+    ImageView poiToolbarBackButton;
     TextView tvInfoFragmentPointName;
     ImageView ivInfoFragmentPointImage;
     ImageView ivInfoFragmentPointCategory;
@@ -75,7 +76,15 @@ public class InterestPointFragment extends Fragment {
         activity.setSupportActionBar(infoFragmentToolbar);
         if (activity.getSupportActionBar() != null)
             activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+        poiToolbarBackButton = view.findViewById(R.id.poiToolbarBackButton);
+        poiToolbarBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
     }
+
 
     private void fillDialog(View view) {
         tvInfoFragmentPointName = view.findViewById(R.id.tvInfoFragmentPointName);

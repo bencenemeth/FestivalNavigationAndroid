@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/poiToolbarBackButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/LightColorPrimary"
@@ -123,7 +123,7 @@
                 android:layout_marginStart="72dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                tools:layout_editor_absoluteY="469dp"
+                app:layout_constraintTop_toBottomOf="@+id/tvInfoFragmentPointOpeningHours"
                 tools:text="Description" />
 
         </android.support.constraint.ConstraintLayout>

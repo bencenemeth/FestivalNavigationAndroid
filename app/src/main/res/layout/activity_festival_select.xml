@@ -11,14 +11,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="50dp"
         android:layout_marginTop="50dp"
         android:adjustViewBounds="true"
-        android:alpha="0.2"
-        android:maxHeight="150dp"
-        android:maxWidth="150dp"
+        android:maxHeight="300dp"
+        android:maxWidth="300dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/sziget" />
+        android:src="@drawable/imagineedmpic" />
 
     <Spinner
         android:id="@+id/spinnerFestivals"
@@ -28,11 +27,11 @@
 
     <Button
         android:id="@+id/btnSelectFestival"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
-        
+        android:textSize="20sp"
         android:text="Select" />
 
 

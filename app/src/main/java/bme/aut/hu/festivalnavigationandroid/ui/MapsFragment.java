@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -153,9 +154,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         mClusterManager.setRenderer(renderer);
 
         // Setting the bounds of the camera
-        // TODO: FROM SERVER
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(map.getLatLngBounds().getCenter(), 15));
-        //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(map.getLatLngBounds().getCenter(), 15), 2000, null);
         moveCamera(map.getLatLngBounds().getCenter(), 15, 0, 0, 1000);
         mMap.setLatLngBoundsForCameraTarget(map.getLatLngBounds());
         mMap.setMinZoomPreference(14.85f);
@@ -174,6 +172,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         });
 
         setOnCameraIdle();
+    }
+
+    public void refreshMap(Map map) {
+        this.map = map;
+
+        // Clearing the map and the cluster manager (no need for other points in navigation mode)
+        mMap.clear();
+        mClusterManager.clearItems();
+
+        // Adding the POIs to the map as markers
+        addItems();
+
+        mClusterManager.cluster();
     }
 
     /**
@@ -322,7 +333,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
      * Timer for recentering the map to the current position while navigating to a point.
      */
     public void createTimer() {
-        countDownTimer = new CountDownTimer(5000,1000) {
+        countDownTimer = new CountDownTimer(10000,1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 // Nothing happens on ticks
@@ -330,7 +341,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
             @Override
             public void onFinish() {
-                calculateNearestPoint();
+                followMyLocation(calculateNearestPoint());
                 countDownTimer.start();
             }
         };
@@ -368,7 +379,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         // Putting up the destination point to the map
         mClusterManager.addItem(interestPoint);
-        mClusterManager.cluster();
 
         // Drawing the route to the destination
         PolylineOptions lineOptions = new PolylineOptions().color(Color.BLUE).width(5f);
@@ -380,6 +390,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
         mMap.addPolyline(lineOptions);
 
+        mClusterManager.cluster();
+
         // Setting the camera position
         followMyLocation(path.getControlPoints().get(0));
     }
@@ -388,50 +400,58 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
      * Recenter the view to the current location.
      */
     private void followMyLocation(ControlPoint point) {
-        /*CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(new LatLng(MY_LOCATION.getLatitude(), MY_LOCATION.getLongitude()))
-                .zoom(19)
-                .tilt(90)
-                .bearing(calculateBearing(point))
-                .build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);*/
         moveCamera(new LatLng(MY_LOCATION.getLatitude(), MY_LOCATION.getLongitude()), 19, 90, calculateBearing(point), 2000);
     }
 
     /**
      * Calculating the nearest point to the current location.
      */
-    private void calculateNearestPoint() {
+    public ControlPoint calculateNearestPoint() {
 
-        // Points and distances to a HashMap
-        // Only ID isn't enough because we need the point for calculating the camera bearing later
+        if(navigationOn) {
+            // Points and distances to a HashMap
+            // Only ID isn't enough because we need the point for calculating the camera bearing later
 
-        java.util.Map<ControlPoint, Float> distances = new HashMap<>();
+            java.util.Map<ControlPoint, Float> distances = new HashMap<>();
 
-        // Calculating distances to the points
-        for(ControlPoint point : path.getControlPoints())
-            distances.put(point, MY_LOCATION.distanceTo(point.getLocation()));
+            // Calculating distances to the points
+            for (ControlPoint point : path.getControlPoints())
+                distances.put(point, MY_LOCATION.distanceTo(point.getLocation()));
 
-        // Get the minimum to a map entry
-        java.util.Map.Entry<ControlPoint, Float> min = null;
-        for(java.util.Map.Entry<ControlPoint, Float> entry : distances.entrySet()) {
-            if (min == null) {
-                min = entry;
+            // Get the minimum to a map entry
+            java.util.Map.Entry<ControlPoint, Float> min = null;
+            for (java.util.Map.Entry<ControlPoint, Float> entry : distances.entrySet()) {
+                if (min == null) {
+                    min = entry;
+                }
+                if (min.getValue() > entry.getValue()) {
+                    min = entry;
+                    //path.getControlPoints().remove(0);
+                }
             }
-            if (min.getValue() > entry.getValue()) {
-                min = entry;
-                path.getControlPoints().remove(0);
-            }
+
+            if(distances.get(path.getControlPoints().get(path.getControlPoints().size()-1)) < 10)
+                endNavigation();
+
+
+            // If the distance to the nearest control point is further then 100 meters then we need to reroute
+            if (min.getValue() > 20)
+                mCallback.callForNavigation(selectedPoint);
+
+            return min.getKey();
+
+            //reDrawRoute();
+
+            // külön kéne
+            //followMyLocation(min.getKey());
         }
+        else
+            return null;
+    }
 
-        // If the distance to the nearest control point is further then 100 meters then we need to reroute
-        if(min.getValue()>100)
-            mCallback.callForNavigation(selectedPoint);
-
-        reDrawRoute();
-
-        // külön kéne
-        followMyLocation(min.getKey());
+    private void endNavigation() {
+        Toast.makeText(context, "You have reached your destination!", Toast.LENGTH_SHORT).show();
+        cancelNavigation();
     }
 
     private void reDrawRoute() {
@@ -450,10 +470,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private void cancelNavigation() {
         countDownTimer.cancel();
         navigationOn = false;
-        this.path = null;
+        path = null;
+        selectedPoint = null;
 
         // Show the navigation button
-        btnStartNavigation.setVisibility(View.VISIBLE);
+        //btnStartNavigation.setVisibility(View.VISIBLE);
 
         // Hide the cancel navigation button
         btnCancelNavigation.setVisibility(View.GONE);

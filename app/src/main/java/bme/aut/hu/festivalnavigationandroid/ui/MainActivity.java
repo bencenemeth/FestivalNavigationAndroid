@@ -118,7 +118,7 @@ public class MainActivity
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         handler = new Handler();
-        delay = 5000;
+        delay = 2000;
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         map = getIntent().getParcelableExtra("map");
@@ -249,7 +249,7 @@ public class MainActivity
             @Override
             public void onFailure(@NonNull Call<InterestPointContainer> call, @NonNull Throwable t) {
                 t.printStackTrace();
-                Toast.makeText(MainActivity.this, "Error in network request, check LOG", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Error in network request, check LOG", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -268,6 +268,7 @@ public class MainActivity
             setDistanceTo(temp);
             map.getInterestPoints().add(temp);
         }
+        //mapsFragment.refreshMap(map);
         mapIsReady = true;
         sortInterestPoints(SORT_MODE);
         //listFragment.onCompletion();
@@ -287,6 +288,7 @@ public class MainActivity
                     if(location != null) {
                         MY_LOCATION = location;
                         setDistanceTo(null);
+                        mapsFragment.calculateNearestPoint();
                         // Calls notifyDataSetChanged
                         listFragment.onCompletion();
                     }
@@ -352,9 +354,8 @@ public class MainActivity
 
     private void startNavigation(final InterestPoint destinationPoint) {
         // Map is unavailable until the response.
-        mapIsReady = false;
         if(destinationPoint == null) {
-            Toast.makeText(MainActivity.this, "Error: No destination point given!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(MainActivity.this, "Error: No destination point given!", Toast.LENGTH_SHORT).show();
             return;
         }
         // Network call
@@ -362,6 +363,7 @@ public class MainActivity
             @Override
             public void onResponse(@NonNull Call<ControlPointContainer> call, @NonNull Response<ControlPointContainer> response) {
                 if(response.isSuccessful()) {
+                    mapIsReady = true;
                     mapsFragment.startNavigation(response.body(), destinationPoint);
                     mapsFragment.setSelectedPoint(destinationPoint);
                 } else {
@@ -372,7 +374,7 @@ public class MainActivity
             @Override
             public void onFailure(@NonNull Call<ControlPointContainer> call, @NonNull Throwable t) {
                 t.printStackTrace();
-                Toast.makeText(MainActivity.this, "Error in network request, check LOG", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Error in network request, check LOG", Toast.LENGTH_SHORT).show();
             }
         });
     }
