@@ -8,4 +8,5 @@
     <string name="location_access_granted">LOCATION GRANTED</string>
     <string name="location_access_denied">LOCATION DENIED</string>
     <string name="ok">OK</string>
+    <string name="start_navigation">Start Navigation</string>
 </resources>

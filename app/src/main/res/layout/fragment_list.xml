@@ -15,32 +15,37 @@
         app:refreshType="material">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycleView"
+            android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingEnd="@dimen/list_item_side_padding"
+            android:paddingStart="@dimen/list_item_side_padding"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         </android.support.v7.widget.RecyclerView>
 
     </com.baoyz.widget.PullRefreshLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <Button
             android:id="@+id/btnStartNavigation"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
+            android:layout_gravity="center"
             android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
             android:background="@color/colorMapsNavigation"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
             android:enabled="false"
-            android:text="Start Navigation"
+            android:text="@string/start_navigation"
             android:textColor="@color/white" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </LinearLayout>

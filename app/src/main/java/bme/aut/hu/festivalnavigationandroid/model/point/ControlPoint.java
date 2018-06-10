@@ -1,5 +1,6 @@
 package bme.aut.hu.festivalnavigationandroid.model.point;
 
+import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,14 +27,16 @@ public class ControlPoint implements Parcelable {
     @Expose
     private double lon;
 
-    private LatLng location;
+    private LatLng latlng;
+
+    private Location location;
 
     public ControlPoint() {
     }
 
     public ControlPoint(String id, double lat, double lon) {
         this.id = id;
-        this.location = new LatLng(lat, lon);
+        this.latlng = new LatLng(lat, lon);
     }
 
     public String getId() {
@@ -48,7 +51,11 @@ public class ControlPoint implements Parcelable {
         return lon;
     }
 
-    public LatLng getLocation() {
+    public LatLng getLatLng() {
+        return latlng;
+    }
+
+    public Location getLocation() {
         return location;
     }
 
@@ -64,8 +71,14 @@ public class ControlPoint implements Parcelable {
         this.lon = lon;
     }
 
-    public void setLocation(LatLng location) {
-        this.location = location;
+    public void setLatLng() {
+        this.latlng = new LatLng(lat, lon);
+    }
+
+    public void setLocation() {
+        this.location = new Location("");
+        this.location.setLatitude(lat);
+        this.location.setLongitude(lon);
     }
 
     /**
@@ -76,7 +89,8 @@ public class ControlPoint implements Parcelable {
         id = in.readString();
         lat = in.readDouble();
         lon = in.readDouble();
-        location = (LatLng) in.readValue(LatLng.class.getClassLoader());
+        latlng = (LatLng) in.readValue(LatLng.class.getClassLoader());
+        location = (Location) in.readValue(Location.class.getClassLoader());
     }
 
     @Override
@@ -89,6 +103,7 @@ public class ControlPoint implements Parcelable {
         dest.writeString(id);
         dest.writeDouble(lat);
         dest.writeDouble(lon);
+        dest.writeValue(latlng);
         dest.writeValue(location);
     }
 

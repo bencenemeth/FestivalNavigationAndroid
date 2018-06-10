@@ -2,6 +2,7 @@ package bme.aut.hu.festivalnavigationandroid.ui;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -39,6 +40,8 @@ public class FestivalSelectActivity extends AppCompatActivity implements Activit
 
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0;
 
+    public static boolean NIGHTMODE = false;
+
     private View llFestivalSelect;
 
     private Map map;
@@ -49,7 +52,12 @@ public class FestivalSelectActivity extends AppCompatActivity implements Activit
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(NIGHTMODE)
+            setTheme(R.style.AppThemeNightMode);
+        else
+            setTheme(R.style.AppTheme);
         setContentView(R.layout.activity_festival_select);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         llFestivalSelect = findViewById(R.id.llFestivalSelect);
 
@@ -100,22 +108,24 @@ public class FestivalSelectActivity extends AppCompatActivity implements Activit
      *
      * @param maps the map list
      */
+    @SuppressWarnings("unchecked")
     private void fillUpSpinner(MapContainer maps) {
-        /*List<String> mapNames = new ArrayList<>();
-        for (Map i : maps.getMaps()) {
-            mapNames.add(i.getName());
-        }
 
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mapNames);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerFestivals.setAdapter(spinnerAdapter);*/
+        for (Map i : maps.getMaps()) {
+            i.create();
+        }
 
         // Spinner's adapter needs an array of the objects, instead of a list...
         Map[] spinnerItems = maps.getMaps().toArray(new Map[maps.getMaps().size()]);
 
+        // Calls map.toString to display the map's name
         ArrayAdapter spinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerItems);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerFestivals.setAdapter(spinnerAdapter);
+
+        // If only 1 festival is available, proceed to that festival
+        if(maps.getMaps().size() == 1)
+            proceedToFestival(maps.getMaps().get(0));
     }
 
     /**
