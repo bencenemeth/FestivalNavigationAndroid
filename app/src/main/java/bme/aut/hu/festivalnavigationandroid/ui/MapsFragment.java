@@ -147,8 +147,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             Log.e(TAG, "Style parsing failed.");
         }
 
-        //mMap.setInfoWindowAdapter(new InterestPointInfoWindowAdapter(getContext()));
-
         setUpClusterManager(mMap);
         setUpClusterRenderer(mMap);
         mClusterManager.setRenderer(renderer);
@@ -411,7 +409,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         if(navigationOn) {
             // Points and distances to a HashMap
             // Only ID isn't enough because we need the point for calculating the camera bearing later
-
             java.util.Map<ControlPoint, Float> distances = new HashMap<>();
 
             // Calculating distances to the points
@@ -420,19 +417,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
             // Get the minimum to a map entry
             java.util.Map.Entry<ControlPoint, Float> min = null;
-            for (java.util.Map.Entry<ControlPoint, Float> entry : distances.entrySet()) {
-                if (min == null) {
+            for (java.util.Map.Entry<ControlPoint, Float> entry : distances.entrySet())
+                if (min == null || min.getValue() > entry.getValue())
                     min = entry;
-                }
-                if (min.getValue() > entry.getValue()) {
-                    min = entry;
-                    //path.getControlPoints().remove(0);
-                }
-            }
 
             if(distances.get(path.getControlPoints().get(path.getControlPoints().size()-1)) < 10)
                 endNavigation();
-
 
             // If the distance to the nearest control point is further then 100 meters then we need to reroute
             if (min.getValue() > 20)

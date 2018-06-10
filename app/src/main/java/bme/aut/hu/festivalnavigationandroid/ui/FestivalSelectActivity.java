@@ -26,16 +26,6 @@ import retrofit2.Response;
 
 public class FestivalSelectActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
-    // TODO:
-    /* Szerver visszaad egy map listát, ha semelyik mapon belül nem tartózkodunk éppen.
-       Ilyenkor kiválaszthatjuk, hogy melyik mapot szeretnénk használni, de a navigációt
-       le kéne tiltani.
-       Ha valamelyik mapon belül tartózkodunk, akkor viszont nem kéne kiváalsztani a fesztivált,
-       hanem rögtön azzal a fesztivállal indulhatna el a program.
-       Ehhez az Activity indításos részt ki kéne szervezni külön függvénybe, és ha a szerver
-       csak egy mapot ad vissza, akkor arra meghívni.
-     */
-
     private static final String TAG = "FestivalSelectActivity";
 
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0;
@@ -111,6 +101,9 @@ public class FestivalSelectActivity extends AppCompatActivity implements Activit
     @SuppressWarnings("unchecked")
     private void fillUpSpinner(MapContainer maps) {
 
+        // If only 1 festival is available, proceed to that festival
+        if(maps.getMaps().size() == 1)
+            proceedToFestival(maps.getMaps().get(0));
         for (Map i : maps.getMaps()) {
             i.create();
         }
@@ -122,10 +115,6 @@ public class FestivalSelectActivity extends AppCompatActivity implements Activit
         ArrayAdapter spinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerItems);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerFestivals.setAdapter(spinnerAdapter);
-
-        // If only 1 festival is available, proceed to that festival
-        if(maps.getMaps().size() == 1)
-            proceedToFestival(maps.getMaps().get(0));
     }
 
     /**

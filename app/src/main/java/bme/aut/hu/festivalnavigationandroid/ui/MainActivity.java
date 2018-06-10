@@ -328,7 +328,7 @@ public class MainActivity
             };
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
         }
-    }/*
+    }*/
 
     /**
      * Setting the distance from own location to the points.

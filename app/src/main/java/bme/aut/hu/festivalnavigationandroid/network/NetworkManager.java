@@ -16,7 +16,7 @@ public class NetworkManager {
 
     // TODO: ENDPOINT
     //private static final String ENDPOINT_ADDRESS = "http://10.0.2.2:3000/api/v1/";
-    private static final String ENDPOINT_ADDRESS = "http://192.168.0.100:3000/api/v1/";
+    private static final String ENDPOINT_ADDRESS = "http://192.168.0.101:3000/api/v1/";
 
     private static NetworkManager instance;
 
