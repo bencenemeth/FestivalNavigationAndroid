@@ -20,6 +20,10 @@ public class NetworkManager {
 
     private static NetworkManager instance;
 
+    /**
+     * Singleton
+     * @return
+     */
     public static NetworkManager getInstance() {
         if (instance == null)
             instance = new NetworkManager();
@@ -27,6 +31,7 @@ public class NetworkManager {
     }
 
     private Retrofit retrofit;
+
     private FestivalApi festivalApi;
 
     private NetworkManager() {

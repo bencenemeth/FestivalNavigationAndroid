@@ -381,6 +381,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         // Drawing the route to the destination
         PolylineOptions lineOptions = new PolylineOptions().color(Color.BLUE).width(5f);
         lineOptions.add(new LatLng(MY_LOCATION.getLatitude(), MY_LOCATION.getLongitude()));
+
         for(ControlPoint cp : path.getControlPoints()) {
             cp.setLocation();
             cp.setLatLng();

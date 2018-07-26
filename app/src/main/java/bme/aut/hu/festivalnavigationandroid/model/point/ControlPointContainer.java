@@ -18,6 +18,7 @@ public class ControlPointContainer {
     @SerializedName("length")
     @Expose
     private int length;
+    
 
     public List<ControlPoint> getControlPoints() {
         return controlPoints;

@@ -46,6 +46,7 @@ public class FestivalSelectActivity extends AppCompatActivity implements Activit
             setTheme(R.style.AppThemeNightMode);
         else
             setTheme(R.style.AppTheme);
+
         setContentView(R.layout.activity_festival_select);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 

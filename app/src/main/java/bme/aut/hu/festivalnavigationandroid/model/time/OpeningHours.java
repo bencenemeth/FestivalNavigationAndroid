@@ -75,6 +75,7 @@ public class OpeningHours implements Parcelable {
 
         openCal = Calendar.getInstance();
         closeCal = Calendar.getInstance();
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault());
         String openTemp = open.replace("Z", "+00:00");
         String closeTemp = close.replace("Z", "+00:00");

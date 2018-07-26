@@ -28,6 +28,7 @@ import bme.aut.hu.festivalnavigationandroid.model.time.OpeningHours;
 public class InterestPointFragment extends Fragment {
 
     private InterestPoint interestPoint;
+
     Toolbar infoFragmentToolbar;
     ImageView poiToolbarBackButton;
     TextView tvInfoFragmentPointName;

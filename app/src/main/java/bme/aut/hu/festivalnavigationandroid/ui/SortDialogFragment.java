@@ -103,6 +103,6 @@ public class SortDialogFragment extends DialogFragment {
     }
 
     public interface NoticeSortDialogListener {
-        public void onSortDialogPositiveClick();
+        void onSortDialogPositiveClick();
     }
 }

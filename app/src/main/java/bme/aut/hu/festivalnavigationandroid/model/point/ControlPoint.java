@@ -31,6 +31,7 @@ public class ControlPoint implements Parcelable {
 
     private Location location;
 
+
     public ControlPoint() {
     }
 

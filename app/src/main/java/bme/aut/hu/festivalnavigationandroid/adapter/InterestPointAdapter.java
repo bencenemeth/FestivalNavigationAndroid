@@ -34,6 +34,7 @@ public class InterestPointAdapter extends RecyclerView.Adapter<InterestPointAdap
     private AdapterChangeListener mCallback;
 
     private List<InterestPoint> pois;
+
     private Context context;
     private int lastSelectedPosition = -1;
 

@@ -165,6 +165,7 @@ public class ListFragment extends Fragment {
             btnStartNavigation.setEnabled(false);
         else
             btnStartNavigation.setEnabled(true);
+
         SELECTED_POINT_POSITION = selectedPointPosition;
     }
 

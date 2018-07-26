@@ -128,6 +128,7 @@ public class MainActivity
 
         setUpToolbar();
         //categoryNames = new ArrayList<>();
+
         instantiateFragments();
         setUpViewPager();
         if(NIGHTMODE)

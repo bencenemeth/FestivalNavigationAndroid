@@ -10,6 +10,9 @@ import java.util.Date;
  * Created by ben23 on 2018-02-14.
  */
 
+/**
+ * UNUSED
+ */
 public class MyTime implements Parcelable {
     private int year;
     private int month;

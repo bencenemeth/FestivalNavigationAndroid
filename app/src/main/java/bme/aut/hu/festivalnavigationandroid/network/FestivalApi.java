@@ -25,7 +25,6 @@ public interface FestivalApi {
     @GET("maps/{mapID}")
     Call<Map> getMap(@Path("mapID") String mapID);
 
-
     // TODO: THEORETICALLY USELESS
     @GET("maps/{mapID}/controls")
     Call<List<ControlPoint>> getControlPoints(@Path("mapID") String mapID);
